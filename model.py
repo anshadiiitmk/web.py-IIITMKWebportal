@@ -1,6 +1,13 @@
-import web, datetime
+import web, datetime,sys
 
-db=web.database(dbn="sqlite",db="IIITMK.db")
+try:
+	db=web.database(dbn="sqlite",db="IIITMK.db")
+except: 
+	print "Could not connect to database"
+	sys.exit()
+
+def getUsers():
+	 return db.select('IIITMKLogin', order='id DESC')
 
 def get_posts():
     return db.select('OpinionPoll', order='id DESC')
@@ -18,12 +25,46 @@ def del_post(id):
     db.delete('OpinionPoll', where="id=$id", vars=locals())
 
 def update_post(id, title, text):
-    db.update('OpinionPoll', where="id=$id", vars=locals(),
-        topic=title, content=text)
+    db.update('OpinionPoll', where="id=$id", vars=locals(),topic=title, content=text)
 
-def getAdmin(id):
-  try:
-		db.select("IIITMKLogin",where='account_type=$id',vars=locals())[0]
+def getAdminDetails(id):
+	try:
+		
+		return db.select('IIITMKLogin',what='username,password',where='account_type=$id')
+		
 	except IndexError:
 		return None
+
+def get_UserDetails(username):
+	return db.select('IIITMKLogin',where='username=$username')
+
+
+def get_Requests():
+	return db.select('UserDetails',vars=locals(),where='valid=0')
+
+
+def approveUser(id):
+	try:
+		db.update('UserDetails',where="id=$id",vars=locals(),valid=1)
+	except IndexError:
+		return None
+
+def rejectUser(id):
+	try:
+		db.update('UserDetails',where="id=$id",vars=locals(),valid=0)
+	except IndexError:
+		return None
+
+
+
+
+
+
+
+
+
+
+
+
+
 		
